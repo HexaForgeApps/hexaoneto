@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Restaurante Hexaone - Sistema de Gestión</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Contenedor de Notificaciones / Toast -->
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+  <!-- Encabezado Principal con Identidad de Marca -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="logo-box">
+          <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 2 8.5 2 15.5 12 22 22 15.5 22 8.5 12 2"></polygon>
+            <circle cx="12" cy="12" r="3.5"></circle>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>RESTAURANTE HEXAONE</h1>
+          <span class="brand-sub">Sistema de Gestión & Control Operativo</span>
+        </div>
+      </div>
+
+      <!-- Barra de Usuario y Estado -->
+      <div class="user-panel" id="userPanel">
+        <div class="user-status">
+          <span class="status-dot connected"></span>
+          <span id="userStatusText">Sesión activa: <strong id="currentUsername">doom</strong></span>
+        </div>
+        <button id="btnLogout" class="btn btn-outline-sm">Cerrar Sesión</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navegación de Pestañas Principales -->
+  <nav class="nav-tabs" aria-label="Módulos del Sistema">
+    <div class="nav-container">
+      <button class="nav-tab active" data-tab="inventario">
+        <span class="tab-icon">📦</span> Inventario
+      </button>
+      <button class="nav-tab" data-tab="recetario">
+        <span class="tab-icon">📖</span> Recetario
+      </button>
+      <button class="nav-tab" data-tab="encuestas">
+        <span class="tab-icon">⭐</span> Encuestas
+      </button>
+      <button class="nav-tab" data-tab="usuarios">
+        <span class="tab-icon">👥</span> Usuarios & Registro
+      </button>
+      <button class="nav-tab" data-tab="reportes">
+        <span class="tab-icon">📄</span> Exportar .TXT
+      </button>
+    </div>
+  </nav>
+
+  <!-- Contenedor Principal de Vistas -->
+  <main class="main-content">
+    
+    <!-- ==================== MÓDULO 1: INVENTARIO ==================== -->
+    <section id="tab-inventario" class="tab-view active">
+      <div class="section-header">
+        <div>
+          <h2>Control de Inventario</h2>
+          <p class="section-description">Gestión de existencias para Barra y Cocina. Sincronización directa con el servidor.</p>
+        </div>
+        <div class="action-buttons">
+          <button id="btnOpenAddProduct" class="btn btn-primary">+ Agregar Producto</button>
+          <button id="btnDownloadInventarioTxt" class="btn btn-secondary">📥 Descargar Inventario (.txt)</button>
+        </div>
+      </div>
+
+      <!-- Filtro rápido por área -->
+      <div class="filter-bar">
+        <label for="filtroArea">Filtrar por Área:</label>
+        <select id="filtroArea" class="form-select">
+          <option value="todas">Todas las Áreas (Barra & Cocina)</option>
+          <option value="barra">Solo Barra</option>
+          <option value="cocina">Solo Cocina</option>
+        </select>
+      </div>
+
+      <!-- Contenedor dinámico de tablas de inventario -->
+      <div id="inventarioContainer" class="inventory-grid">
+        <!-- Renderizado dinámico vía JavaScript -->
+      </div>
+    </section>
+
+    <!-- ==================== MÓDULO 2: RECETARIO ==================== -->
+    <section id="tab-recetario" class="tab-view">
+      <div class="section-header">
+        <div>
+          <h2>Recetario Hexaone</h2>
+          <p class="section-description">Fichas técnicas y proporciones oficiales de coctelería y gastronomía.</p>
+        </div>
+        <div class="action-buttons">
+          <button id="btnDownloadRecetarioTxt" class="btn btn-secondary">📥 Descargar Recetario (.txt)</button>
+        </div>
+      </div>
+
+      <!-- Selector de categoría de recetas -->
+      <div class="category-tabs">
+        <button class="cat-pill active" data-category="todas">Todas</button>
+        <button class="cat-pill" data-category="Barra">Barra (Bebidas y Coctelería)</button>
+        <button class="cat-pill" data-category="Cocina">Cocina (Platillos y Postres)</button>
+      </div>
+
+      <div id="recetasContainer" class="recipes-grid">
+        <!-- Renderizado dinámico vía JavaScript -->
+      </div>
+    </section>
+
+    <!-- ==================== MÓDULO 3: ENCUESTAS ==================== -->
+    <section id="tab-encuestas" class="tab-view">
+      <div class="section-header">
+        <div>
+          <h2>Encuesta de Satisfacción</h2>
+          <p class="section-description">Califique el servicio de 1 a 5 y envíe sus observaciones para el control de calidad.</p>
+        </div>
+        <div class="action-buttons">
+          <button id="btnDownloadEncuestasTxt" class="btn btn-secondary">📥 Descargar Encuesta (.txt)</button>
+        </div>
+      </div>
+
+      <form id="encuestaForm" class="survey-form card">
+        <div id="preguntasContainer" class="questions-list">
+          <!-- Las 6 preguntas se generan automáticamente -->
+        </div>
+
+        <div class="form-footer">
+          <button type="submit" class="btn btn-primary btn-lg">Enviar Encuesta al Servidor</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ==================== MÓDULO 4: GESTIÓN DE USUARIOS ==================== -->
+    <section id="tab-usuarios" class="tab-view">
+      <div class="section-header">
+        <div>
+          <h2>Gestión y Registro de Usuarios</h2>
+          <p class="section-description">Administración de credenciales de acceso, asignación de roles operativos y guardado en usuarios.txt.</p>
+        </div>
+        <div class="action-buttons">
+          <button id="btnOpenAddUser" class="btn btn-primary">+ Registrar Usuario</button>
+          <button id="btnDownloadUsuariosTxt" class="btn btn-secondary">📥 Descargar usuarios.txt</button>
+        </div>
+      </div>
+
+      <div id="usuariosContainer" class="users-grid">
+        <!-- Renderizado dinámico vía JavaScript -->
+      </div>
+    </section>
+
+    <!-- ==================== MÓDULO 5: REPORTES / ARCHIVOS PLANOS ==================== -->
+    <section id="tab-reportes" class="tab-view">
+      <div class="section-header">
+        <div>
+          <h2>Gestión de Archivos de Texto Plano (.txt)</h2>
+          <p class="section-description">Genere, visualice y descargue los archivos compatibles con el script de consola Python.</p>
+        </div>
+        <div class="action-buttons">
+          <button id="btnDescargarTodosTxt" class="btn btn-primary">📥 Descargar Todos los .TXT</button>
+        </div>
+      </div>
+
+      <div class="reports-grid">
+        <div class="report-card card">
+          <div class="card-icon">📦</div>
+          <h3>Reporte de Inventario</h3>
+          <p>Exporta todas las existencias de Barra y Cocina con el formato exacto del sistema de terminal.</p>
+          <button id="btnDescargarTxtInventarioDirecto" class="btn btn-primary w-full">Descargar inventario.txt</button>
+        </div>
+
+        <div class="report-card card">
+          <div class="card-icon">📖</div>
+          <h3>Recetario Completo</h3>
+          <p>Exporta los ingredientes, medidas en onzas, gramos y pasos de cocción de todo el catálogo.</p>
+          <button id="btnDescargarTxtRecetarioDirecto" class="btn btn-primary w-full">Descargar recetario.txt</button>
+        </div>
+
+        <div class="report-card card">
+          <div class="card-icon">⭐</div>
+          <h3>Encuesta de Satisfacción</h3>
+          <p>Exporta las calificaciones y notas de comentarios junto con el cálculo del promedio general.</p>
+          <button id="btnDescargarTxtEncuestaDirecto" class="btn btn-primary w-full">Descargar encuesta.txt</button>
+        </div>
+
+        <div class="report-card card">
+          <div class="card-icon">👥</div>
+          <h3>Registro de Usuarios</h3>
+          <p>Exporta el listado de personal con credenciales autorizadas, roles y fecha de registro.</p>
+          <button id="btnDescargarTxtUsuariosDirecto" class="btn btn-primary w-full">Descargar usuarios.txt</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== MODAL: AGREGAR PRODUCTO ==================== -->
+  <div id="modalAddProduct" class="modal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-content card">
+      <div class="modal-header">
+        <h3>Agregar Nuevo Producto</h3>
+        <button class="modal-close" id="btnCloseAddModal">&times;</button>
+      </div>
+      <form id="formAddProduct" class="modal-form">
+        <div class="form-group">
+          <label for="modalArea">Área:</label>
+          <select id="modalArea" class="form-select" required>
+            <option value="1">1. Barra</option>
+            <option value="2">2. Cocina</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="modalGrupo">Grupo disponible:</label>
+          <select id="modalGrupo" class="form-select" required>
+            <!-- Llenado dinámico según área -->
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="modalNombre">Nombre del producto:</label>
+          <input type="text" id="modalNombre" class="form-input" placeholder="Ej: Ginebra, Salmón..." required>
+        </div>
+
+        <div class="form-group">
+          <label for="modalCantidad">Cantidad inicial (unidades):</label>
+          <input type="number" id="modalCantidad" class="form-input" min="0" value="10" required>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" id="btnCancelAddModal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar en Servidor</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: MODIFICAR CANTIDAD ==================== -->
+  <div id="modalEditQuantity" class="modal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-content card">
+      <div class="modal-header">
+        <h3>Modificar Stock de Inventario</h3>
+        <button class="modal-close" id="btnCloseEditModal">&times;</button>
+      </div>
+      <form id="formEditQuantity" class="modal-form">
+        <input type="hidden" id="editArea">
+        <input type="hidden" id="editGrupoIdx">
+        <input type="hidden" id="editProductIdx">
+
+        <p class="edit-product-label">Producto: <strong id="editProductNombre">-</strong></p>
+
+        <div class="form-group">
+          <label for="editNuevaCantidad">Nueva Cantidad de Unidades:</label>
+          <input type="number" id="editNuevaCantidad" class="form-input" min="0" required>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" id="btnCancelEditModal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Actualizar Stock</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: REGISTRAR USUARIO ==================== -->
+  <div id="modalAddUser" class="modal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-content card">
+      <div class="modal-header">
+        <h3>Registrar Nuevo Usuario</h3>
+        <button class="modal-close" id="btnCloseAddUserModal">&times;</button>
+      </div>
+      <form id="formAddUser" class="modal-form">
+        <div class="form-group">
+          <label for="regModalNombre">Nombre Completo:</label>
+          <input type="text" id="regModalNombre" class="form-input" placeholder="Ej: Laura Sánchez" required>
+        </div>
+
+        <div class="form-group">
+          <label for="regModalUsuario">Nombre de Usuario (Login):</label>
+          <input type="text" id="regModalUsuario" class="form-input" placeholder="Ej: laura_bar" required>
+        </div>
+
+        <div class="form-group">
+          <label for="regModalRol">Rol Operativo:</label>
+          <select id="regModalRol" class="form-select" required>
+            <option value="Administrador">Administrador</option>
+            <option value="Gerente">Gerente</option>
+            <option value="Barra / Bartender">Barra / Bartender</option>
+            <option value="Cocina / Chef">Cocina / Chef</option>
+            <option value="Mesero" selected>Mesero</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="regModalPass">Contraseña:</label>
+          <input type="password" id="regModalPass" class="form-input" placeholder="Mínimo 4 caracteres" required>
+        </div>
+
+        <div class="form-group">
+          <label for="regModalPassConfirm">Confirmar Contraseña:</label>
+          <input type="password" id="regModalPassConfirm" class="form-input" placeholder="Repita la contraseña" required>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" id="btnCancelAddUserModal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Registrar Usuario</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: INICIO DE SESIÓN / REGISTRO ==================== -->
+  <div id="modalLogin" class="modal-overlay-forced" role="dialog" aria-modal="true">
+    <div class="login-card card">
+      <div class="login-brand">
+        <div class="logo-box">
+          <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 2 8.5 2 15.5 12 22 22 15.5 22 8.5 12 2"></polygon>
+            <circle cx="12" cy="12" r="3.5"></circle>
+          </svg>
+        </div>
+        <h2>Acceso al Sistema</h2>
+        <p class="login-subtitle">Sistema Operativo Hexaone (Backend Python)</p>
+
+        <!-- Selector de pestaña Login / Registro -->
+        <div class="auth-toggle-tabs">
+          <button type="button" id="tabBtnLogin" class="auth-tab active">Iniciar Sesión</button>
+          <button type="button" id="tabBtnRegister" class="auth-tab">Crear Cuenta</button>
+        </div>
+      </div>
+
+      <!-- VISTA LOGIN -->
+      <div id="loginViewContainer">
+        <div id="loginAttemptsBadge" class="attempts-badge">
+          Intentos restantes: <strong id="attemptsCount">3</strong>
+        </div>
+
+        <form id="loginForm" class="login-form">
+          <div class="form-group">
+            <label for="loginUser">Usuario:</label>
+            <input type="text" id="loginUser" class="form-input" placeholder="doom o tu usuario" required autocomplete="username">
+          </div>
+
+          <div class="form-group">
+            <label for="loginPassword">Contraseña:</label>
+            <input type="password" id="loginPassword" class="form-input" placeholder="••••" required autocomplete="current-password">
+          </div>
+
+          <button type="submit" id="btnLoginSubmit" class="btn btn-primary btn-block">Ingresar al Sistema</button>
+          
+          <p class="login-hint">Credenciales por defecto: <strong>doom</strong> / <strong>1234</strong></p>
+        </form>
+      </div>
+
+      <!-- VISTA REGISTRO RÁPIDO -->
+      <div id="registerViewContainer" style="display: none;">
+        <form id="quickRegisterForm" class="login-form">
+          <div class="form-group">
+            <label for="quickRegNombre">Nombre Completo:</label>
+            <input type="text" id="quickRegNombre" class="form-input" placeholder="Ej: Laura Sánchez" required>
+          </div>
+
+          <div class="form-group">
+            <label for="quickRegUser">Usuario:</label>
+            <input type="text" id="quickRegUser" class="form-input" placeholder="Ej: laura_bar" required>
+          </div>
+
+          <div class="form-group">
+            <label for="quickRegRol">Rol Operativo:</label>
+            <select id="quickRegRol" class="form-select">
+              <option value="Administrador">Administrador</option>
+              <option value="Gerente">Gerente</option>
+              <option value="Barra / Bartender">Barra / Bartender</option>
+              <option value="Cocina / Chef">Cocina / Chef</option>
+              <option value="Mesero" selected>Mesero</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="quickRegPass">Contraseña:</label>
+            <input type="password" id="quickRegPass" class="form-input" placeholder="Mínimo 4 caracteres" required>
+          </div>
+
+          <div class="form-group">
+            <label for="quickRegPassConfirm">Confirmar Contraseña:</label>
+            <input type="password" id="quickRegPassConfirm" class="form-input" placeholder="Repite contraseña" required>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block">Registrarse y Acceder</button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
